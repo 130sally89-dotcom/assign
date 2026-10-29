@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>제주 한입 - 제주 특산물 탐험</title>
+<meta name="description" content="제주 특산물을 사진으로 둘러보고, 가고 싶은 곳을 저장하세요.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+:root{
+  --bg:#fbf7f0; --surface:#ffffff; --ink:#1f1a14; --muted:#7b7266; --line:#ece4d6;
+  --accent:#ff7a00; --accent-ink:#ffffff; --leaf:#2f7d46; --soft:#fff1de;
+  --r:20px; --shadow:0 1px 2px rgba(31,26,20,.06),0 8px 24px rgba(31,26,20,.07);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15120e;--surface:#201b15;--ink:#f6efe4;--muted:#a79d8d;--line:#332c22;--soft:#33261a;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35)}
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:10px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* nav (glass) */
+.nav{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:30;width:min(920px,calc(100% - 24px));display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px 8px 18px;border-radius:999px;background:rgba(255,255,255,.72);backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow)}
+@media (prefers-color-scheme:dark){.nav{background:rgba(32,27,21,.7);border-color:rgba(255,255,255,.08)}}
+.nav .logo{font-weight:800;text-decoration:none;letter-spacing:-.02em;white-space:nowrap}
+.nav ul{display:flex;gap:2px;list-style:none;padding:0}
+.nav ul a{display:block;padding:7px 14px;border-radius:999px;text-decoration:none;font-size:.92rem;font-weight:600;color:var(--muted);transition:.15s}
+.nav ul a:hover{background:var(--soft);color:var(--ink)}
+.cnt{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:5px;border-radius:99px;background:var(--accent);color:#fff;font-size:.74rem;font-weight:700}
+
+/* hero */
+.hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;color:#fff;background:#3b2a18 center/cover no-repeat;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25) 0%,rgba(0,0,0,.15) 40%,rgba(20,12,4,.78) 100%)}
+.hero .wrap{position:relative;padding-top:120px;padding-bottom:64px;width:100%}
+.hero h1{font-size:clamp(2.4rem,7vw,5rem);line-height:1.08;letter-spacing:-.04em;font-weight:800;max-width:12em}
+.hero p{margin:18px 0 28px;font-size:clamp(1rem,2vw,1.2rem);max-width:30em;opacity:.92}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:999px;padding:14px 26px;font-weight:700;text-decoration:none;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn-main{background:var(--accent);color:var(--accent-ink)}
+.btn-glass{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.45);backdrop-filter:blur(8px)}
+.btn-line{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+
+/* sections */
+section{padding:84px 0 0}
+.eyebrow{font-size:.82rem;font-weight:700;letter-spacing:.08em;color:var(--accent);margin-bottom:6px}
+h2{font-size:clamp(1.6rem,3.5vw,2.4rem);letter-spacing:-.03em;line-height:1.2}
+.lead{color:var(--muted);margin-top:8px}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:26px 0 22px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 16px;font-weight:600;font-size:.92rem;transition:.15s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.search{position:relative;width:min(300px,100%)}
+.search input{width:100%;padding:11px 38px 11px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface)}
+.search input:focus{outline:none;border-color:var(--accent)}
+.search button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:50%;background:var(--soft)}
+.count{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.card{position:relative;background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s;animation:in .35s ease both}
+.card:hover{transform:translateY(-4px)}
+.card:hover .ph img{transform:scale(1.06)}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--soft);display:grid;place-items:center;font-size:3.4rem}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.ph.loading::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);animation:sh 1.2s infinite}
+@keyframes sh{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.card .open{all:unset;display:block;cursor:pointer;width:100%}
+.card .open:focus-visible{outline:3px solid var(--accent);outline-offset:-3px;border-radius:var(--r)}
+.info{padding:14px 16px 16px}
+.info .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.info h3{font-size:1.1rem;letter-spacing:-.02em}
+.tag{font-size:.74rem;font-weight:700;color:var(--leaf);background:color-mix(in srgb,var(--leaf) 12%,transparent);padding:2px 9px;border-radius:99px}
+.info p{color:var(--muted);font-size:.9rem;margin-top:4px}
+.heart{position:absolute;top:10px;right:10px;z-index:2;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:#222;font-size:1.15rem;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .15s}
+.heart:hover{transform:scale(1.1)}
+.heart.on{background:var(--accent);color:#fff}
+.heart.pulse{animation:beat .35s}
+@keyframes beat{40%{transform:scale(1.35)}}
+.empty{grid-column:1/-1;text-align:center;padding:48px 20px;border:1.5px dashed var(--line);border-radius:var(--r);color:var(--muted)}
+.empty p{margin-bottom:14px}
+.note{display:inline-block;margin-top:10px;font-size:.86rem;color:var(--muted);background:var(--soft);padding:6px 12px;border-radius:99px}
+
+/* restaurants */
+.rest-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.rest-links a{padding:9px 16px;border-radius:999px;background:var(--surface);border:1.5px solid var(--line);text-decoration:none;font-weight:600;font-size:.92rem;transition:.15s}
+.rest-links a:hover{border-color:var(--accent)}
+.rest{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:10px}
+.rest h4{margin-bottom:2px}
+.rest p{font-size:.9rem;color:var(--muted)}
+
+/* modal */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(10,6,2,.6);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{position:relative;background:var(--bg);width:min(680px,100%);max-height:92vh;overflow:auto;border-radius:28px 28px 0 0;animation:up .3s ease}
+@media (min-width:720px){.overlay{align-items:center;padding:20px}.modal{border-radius:28px}}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.modal .ph{aspect-ratio:16/9;border-radius:0}
+.modal .body{padding:22px 24px 28px}
+.modal h3{font-size:1.7rem;letter-spacing:-.03em;margin:6px 0 4px}
+.close{position:absolute;top:12px;left:12px;z-index:3;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:#222}
+.facts{display:grid;gap:8px;margin:16px 0 22px}
+.facts div{background:var(--surface);border-radius:14px;padding:10px 14px;font-size:.93rem}
+.facts small{display:block;color:var(--muted);font-weight:700;font-size:.76rem}
+.modal h4{margin-bottom:6px}
+.maplinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.maplinks a{padding:9px 16px;border-radius:99px;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;font-size:.9rem}
+.maplinks a.alt{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+
+/* AI chatbot */
+#fab{position:fixed;right:20px;bottom:20px;z-index:40;display:flex;align-items:center;gap:8px;height:54px;padding:0 20px 0 16px;border:0;border-radius:99px;background:var(--ink);color:var(--bg);font-weight:700;box-shadow:0 10px 28px rgba(0,0,0,.28);transition:transform .15s}
+#fab:hover{transform:translateY(-2px)}
+#fab .ai{background:var(--accent);color:#fff;border-radius:8px;font-size:.72rem;padding:2px 6px;letter-spacing:.04em}
+#chat{position:fixed;right:20px;bottom:86px;z-index:40;width:380px;max-width:calc(100vw - 24px);height:560px;max-height:calc(100vh - 110px);display:none;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+#chat.open{display:flex}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.ch b{display:flex;align-items:center;gap:8px}
+.ch .ai{background:var(--accent);color:#fff;border-radius:8px;font-size:.72rem;padding:2px 7px}
+.ch button{border:0;background:var(--soft);width:32px;height:32px;border-radius:50%;margin-left:4px}
+.cfg{display:none;padding:12px 16px;background:var(--soft);font-size:.8rem;color:var(--muted)}
+.cfg.open{display:block}
+.cfg input{width:100%;margin:8px 0;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface)}
+.cfg button{border:0;border-radius:10px;padding:6px 14px;background:var(--ink);color:var(--bg);font-weight:700;margin-right:6px}
+.log{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:86%;padding:10px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word;font-size:.93rem}
+.msg.bot{background:var(--soft);align-self:flex-start;border-bottom-left-radius:6px}
+.msg.me{background:var(--accent);color:#fff;align-self:flex-end;border-bottom-right-radius:6px}
+.msg.err{background:#fde8e4;color:#8a2a18;align-self:flex-start}
+.dots span{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--accent);animation:bl 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.cf{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.cf textarea{flex:1;resize:none;height:44px;max-height:100px;border-radius:14px;border:1.5px solid var(--line);padding:9px 12px;background:var(--bg)}
+.cf textarea:focus{outline:none;border-color:var(--accent)}
+.cf button{border:0;border-radius:14px;background:var(--accent);color:#fff;font-weight:700;padding:0 18px}
+.cf button:disabled{opacity:.5}
+
+footer{margin-top:90px;padding:28px 0 100px;border-top:1px solid var(--line);color:var(--muted);font-size:.82rem}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.toast.show{opacity:1}
+
+@media (max-width:640px){
+  .nav{padding-left:14px}.nav ul a{padding:6px 9px;font-size:.8rem}
+  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .info{padding:10px 12px 14px}.info p{display:none}
+  section{padding-top:64px}
+  #chat{right:8px;bottom:80px;width:calc(100vw - 16px);height:72vh}
+  #fab{right:12px;bottom:12px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a class="logo" href="#top" aria-label="제주 한입 홈">🍊 제주 한입</a>
+  <ul>
+    <li><a href="#explore">특산물</a></li>
+    <li><a href="#wishlist">가고 싶은 곳<span class="cnt" id="navCount" aria-label="저장된 항목 수">0</span></a></li>
+    <li><a href="#restaurants">맛집</a></li>
+  </ul>
+</header>
+
+<main id="top">
+  <div class="hero" id="heroBg">
+    <div class="wrap">
+      <h1>제주를 한입에,<br>여행을 한가득 🍊</h1>
+      <p>제주에서 꼭 맛봐야 할 특산물부터 현지 맛집까지, 나만의 제주 여행 리스트를 만들어 보세요.</p>
+      <div class="btns">
+        <a class="btn btn-main" href="#explore">특산물 탐험하기</a>
+        <a class="btn btn-glass" href="#wishlist">가고 싶은 곳 보기</a>
+      </div>
+    </div>
+  </div>
+
+  <section id="explore">
+    <div class="wrap">
+      <div class="eyebrow">EXPLORE</div>
+      <h2>특산물 탐험</h2>
+      <p class="lead">사진을 눌러 자세히 보고, 하트로 저장하세요.</p>
+      <div class="bar">
+        <div class="chips" id="chips" role="group" aria-label="카테고리"></div>
+        <div class="search">
+          <label class="sr-only" for="q">특산물 검색</label>
+          <input id="q" type="search" placeholder="특산물 검색 (예: 감귤)" autocomplete="off">
+          <button id="qx" aria-label="검색어 지우기" hidden>✕</button>
+        </div>
+      </div>
+      <div class="count" id="exCount" aria-live="polite"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section id="wishlist">
+    <div class="wrap">
+      <div class="eyebrow">MY LIST</div>
+      <h2>가고 싶은 곳</h2>
+      <p class="lead">추천 점수 높은 순으로 정렬돼요.</p>
+      <span class="note">로그인이 없어 이 브라우저에만 저장돼요.</span>
+      <div class="bar">
+        <div class="count" id="wCount" aria-live="polite" style="margin:0"></div>
+        <div class="search">
+          <label class="sr-only" for="wq">저장 목록 검색</label>
+          <input id="wq" type="search" placeholder="저장 목록에서 검색" autocomplete="off">
+          <button id="wqx" aria-label="검색어 지우기" hidden>✕</button>
+        </div>
+      </div>
+      <div class="grid" id="wGrid"></div>
+    </div>
+  </section>
+
+  <section id="restaurants">
+    <div class="wrap">
+      <div class="eyebrow">FOOD</div>
+      <h2>제주 맛집</h2>
+      <p class="lead">특산물을 고르면 지도에서 바로 맛집을 찾아볼 수 있어요.</p>
+      <div id="restBox"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    추천 점수는 서비스 내부 기준의 임의 점수이며 실제 사용자 평점이 아닙니다. 제철 정보는 일반적인 참고용이며 해마다·지역마다 다를 수 있어요.<br>
+    사진: Wikimedia Commons (각 파일의 라이선스·저작자는 Commons 파일 페이지에서 확인할 수 있습니다). 일부 사진은 같은 종류의 일반 사진이라 제주 현지에서 찍은 것이 아닐 수 있어요.
+  </div>
+</footer>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="modal" id="modal"></div></div>
+
+<button id="fab" aria-label="AI 챗봇 열기" aria-expanded="false"><span>🍊</span> 제주 도우미 <span class="ai">AI</span></button>
+<div id="chat" role="dialog" aria-label="AI 챗봇">
+  <div class="ch">
+    <b>🍊 제주 특산물 도우미 <span class="ai">AI 챗봇</span></b>
+    <span><button id="cfgBtn" aria-label="챗봇 설정">⚙</button><button id="cx" aria-label="챗봇 닫기">✕</button></span>
+  </div>
+  <div class="cfg" id="cfg">
+    키 없이도 기본 모드로 사용할 수 있어요(등록된 특산물 정보 기반). 더 자유로운 AI 대화를 원하면 Gemini API 키를 입력하세요. 키는 이 브라우저에만 저장되니 공용 PC에서는 사용하지 마세요.
+    <input id="keyIn" type="password" placeholder="Gemini API 키" autocomplete="off" aria-label="Gemini API 키">
+    <button id="keySave">저장</button><button id="keyDel">삭제</button>
+  </div>
+  <div class="log" id="log" aria-live="polite"></div>
+  <form class="cf" id="cform">
+    <label class="sr-only" for="cin">질문 입력</label>
+    <textarea id="cin" maxlength="500" placeholder="제주에 대해 물어보세요 (Enter 전송)"></textarea>
+    <button type="submit" id="send">전송</button>
+  </form>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ===== 설정 ===== */
+// 프록시 서버가 있다면 주소를 넣으세요. POST {messages:[{role,content}]} → {reply:"..."}
+// 비워두면 챗봇 ⚙에 입력한 Gemini 키로 브라우저에서 직접 호출합니다.
+const CHAT_ENDPOINT = "";
+const GEMINI_MODEL = "gemini-2.5-flash";
+const MAX_INPUT = 500, MAX_TURNS = 10, MAX_OUT = 600, COOLDOWN = 3000;
+
+/* ===== 이미지 (Wikimedia Commons, 파일명으로 관리 · 비어 있거나 실패하면 이모지 대체) ===== */
+const commons = (f,w=800)=>`https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(f.replace(/ /g,"_"))}?width=${w}`;
+const HERO_IMG = commons("Seongsan Ilchulbong 01.jpg",1600);
+const IMAGES = {
+  gamgyul: commons("Tangerine tree.jpg"),
+  hallabong: commons("Dekopon.jpg"),
+  cheonhyehyang: commons("Jeju cheonhyehyang 1.jpg"),
+  heukdwaeji: commons("Korean BBQ.jpg"),
+  galchi: commons("Galchi-gui.jpg"),
+  okdom: commons("Korean cuisine-Jeju Island-Okdom gui-Grilled Tilefish-01.jpg"),
+  jeonbok: commons("Jeonbok-hoe-muchim 1.jpg"),
+  memil: commons("Korean cuisine-Jeju Island-Bingtteok-01.jpg"),
+  omegi: commons("Omegi-tteok preparation.jpg"),
+  hanchi: commons("Squid sashimi (26498395600).jpg"),
+  gosari: commons("Pteridium aquilinum (northern bracken fern) 2024-06-25.jpg"),
+  redhyang: commons("Kanpei1.jpg"),   // 레드향은 일본명 칸페이(Kanpei)와 같은 품종으로 알려져 있어요
+  carrot: commons("Carrots farm.jpg"),
+  jari: commons("Korean cuisine-Jeju-Jari mulhoe-Sliced raw damselfish with spicy sauce-01.jpg")
+};
+
+/* ===== 데이터 ===== */
+const CATS = [{id:"all",label:"전체"},{id:"fruit",label:"🍊 과일"},{id:"seafood",label:"🐟 해산물"},{id:"agriculture",label:"🥬 농산물"},{id:"processed",label:"🍪 가공식품"},{id:"local-food",label:"🍲 향토음식"}];
+const CAT_LABEL = {fruit:"과일",seafood:"해산물",agriculture:"농산물",processed:"가공식품","local-food":"향토음식"};
+// selected = 서비스 기본값. 사용자의 변경은 localStorage에 따로 저장됩니다.
+const SPECIALTIES = [
+ {id:"gamgyul",name:"감귤",emoji:"🍊",category:"fruit",score:98,selected:true,description:"제주를 대표하는 새콤달콤한 과일.",why:"따뜻한 기후와 화산 토양에서 오랫동안 재배되어 제주의 상징이 되었어요.",season:"대체로 늦가을~겨울 (노지 감귤 기준)",restaurantIds:[]},
+ {id:"hallabong",name:"한라봉",emoji:"🍊",category:"fruit",score:94,selected:false,description:"꼭지가 볼록 솟은 큼직한 만감류.",why:"한라산에서 이름을 딴 제주 대표 만감류예요.",season:"대체로 겨울~봄",restaurantIds:[]},
+ {id:"cheonhyehyang",name:"천혜향",emoji:"🍊",category:"fruit",score:92,selected:false,description:"향이 진하고 껍질이 얇은 만감류.",why:"‘하늘이 내린 향기’라는 뜻의 이름처럼 향이 매력적이에요.",season:"대체로 겨울~초봄",restaurantIds:[]},
+ {id:"redhyang",name:"레드향",emoji:"🍊",category:"fruit",score:90,selected:false,description:"붉은 껍질과 진한 단맛이 특징.",why:"제주에서 재배되는 대표 만감류 중 하나예요.",season:"대체로 겨울~초봄",restaurantIds:[]},
+ {id:"heukdwaeji",name:"제주 흑돼지",emoji:"🐖",category:"local-food",score:97,selected:true,description:"쫄깃하고 고소한 제주의 대표 향토음식.",why:"제주 재래 흑돼지 문화에서 이어진 음식으로 여행객이 꼭 찾는 메뉴예요.",season:"연중",restaurantIds:[]},
+ {id:"galchi",name:"갈치",emoji:"🐟",category:"seafood",score:93,selected:false,description:"은빛 몸통의 제주 대표 생선.",why:"구이·조림·국으로 즐기는 제주 연안 어업의 대표 생선이에요.",season:"대체로 여름~가을이 제철로 알려져 있어요",restaurantIds:[]},
+ {id:"okdom",name:"옥돔",emoji:"🐠",category:"seafood",score:89,selected:false,description:"담백하고 부드러운 살의 생선.",why:"제주 전통 상차림에 많이 쓰여온 생선이에요.",season:"연중 (겨울 무렵 맛이 좋다고 알려져 있어요)",restaurantIds:[]},
+ {id:"jeonbok",name:"전복",emoji:"🐚",category:"seafood",score:91,selected:false,description:"쫀득한 식감의 제주 바다 해산물.",why:"해녀가 채취해 온 역사가 있는 제주 바다의 대표 먹거리예요.",season:"연중 (조리법에 따라 선호 시기가 다름)",restaurantIds:[]},
+ {id:"carrot",name:"제주 당근",emoji:"🥕",category:"agriculture",score:84,selected:false,description:"달큰해서 주스·샐러드로 인기.",why:"겨울에도 비교적 따뜻한 제주에서 많이 재배돼요.",season:"대체로 겨울~봄",restaurantIds:[]},
+ {id:"memil",name:"메밀",emoji:"🌾",category:"agriculture",score:86,selected:false,description:"국수·빙떡·묵에 두루 쓰이는 곡물.",why:"척박한 화산 토양에서도 잘 자라 제주 전통 음식의 바탕이 되었어요.",season:"대체로 가을 수확",restaurantIds:[]},
+ {id:"omegi",name:"오메기떡",emoji:"🍡",category:"processed",score:88,selected:false,description:"차조로 만든 쫀득한 제주 전통 떡.",why:"제주 전통 곡물인 차조로 만들어 선물용으로도 인기예요.",season:"연중",restaurantIds:[]},
+ {id:"hanchi",name:"한치",emoji:"🦑",category:"seafood",score:87,selected:false,description:"부드럽고 달큰한 오징어류.",why:"제주 여름 바다를 대표하는 해산물로 회·물회로 즐겨요.",season:"대체로 여름",restaurantIds:[]},
+ {id:"gosari",name:"고사리",emoji:"🌿",category:"agriculture",score:83,selected:false,description:"들판에서 자라는 봄나물.",why:"봄철 제주 들판에서 채취해 육개장 등 향토음식에 써요.",season:"대체로 봄",restaurantIds:[]},
+ {id:"jari",name:"자리돔",emoji:"🐟",category:"seafood",score:85,selected:false,description:"뼈째 썰어 먹는 자리물회의 주인공.",why:"제주 바다의 대표 여름 생선이에요.",season:"대체로 늦봄~여름",restaurantIds:[]}
+];
+// 확인되지 않은 식당은 넣지 않았습니다. 확인한 곳만 추가하고 특산물의 restaurantIds 에 id를 연결하세요.
+// {id,name,description,reason,specialtyIds:[],representativeMenu:[],address,phone?,kakaoMapUrl?,source?,verifiedAt?}
+const RESTAURANTS = [];
+
+/* ===== 상태 ===== */
+const LS = "jeju-hanip:selection:v1";
+const st = {cat:"all",q:"",wq:"",ov:{}};
+try{ const o=JSON.parse(localStorage.getItem(LS)||"{}"); if(o&&typeof o==="object") st.ov=o; }catch(e){}
+const isSel = s=>Object.prototype.hasOwnProperty.call(st.ov,s.id)?!!st.ov[s.id]:s.selected;
+function toggle(id){
+  const s=SPECIALTIES.find(x=>x.id===id); if(!s) return;
+  st.ov[id]=!isSel(s);
+  try{localStorage.setItem(LS,JSON.stringify(st.ov));}catch(e){}
+  toast(st.ov[id]?`💚 ${s.name} 저장했어요`:`${s.name}을(를) 목록에서 뺐어요`);
+  render(id);
+}
+
+/* ===== 유틸 ===== */
+const $=s=>document.querySelector(s);
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const byScore=(a,b)=>b.score-a.score||a.name.localeCompare(b.name,"ko");
+const kakao=q=>`https://map.kakao.com/?q=${encodeURIComponent(q)}`;
+const naver=q=>`https://map.naver.com/p/search/${encodeURIComponent(q)}`;
+let tt; function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),1800);}
+function photo(s){
+  const u=IMAGES[s.id];
+  return `<div class="ph${u?" loading":""}"><span aria-hidden="true">${s.emoji}</span>${u?`<img src="${esc(u)}" alt="${esc(s.name)} 사진" loading="lazy" referrerpolicy="no-referrer" data-img>`:""}</div>`;
+}
+// 이미지 로딩 완료/실패 처리 (실패 시 이모지 대체 화면 유지)
+document.addEventListener("load",e=>{ if(e.target.dataset&&"img" in e.target.dataset) e.target.parentNode.classList.remove("loading"); },true);
+document.addEventListener("error",e=>{ if(e.target.dataset&&"img" in e.target.dataset){ const p=e.target.parentNode; e.target.remove(); p.classList.remove("loading"); } },true);
+
+function card(s){
+  const on=isSel(s);
+  return `<article class="card">
+    <button class="heart${on?" on":""}" data-heart="${s.id}" aria-pressed="${on}" aria-label="${esc(s.name)} ${on?"저장 해제":"가고 싶은 곳에 저장"}">${on?"♥":"♡"}</button>
+    <button class="open" data-open="${s.id}" aria-label="${esc(s.name)} 상세 보기">
+      ${photo(s)}
+      <div class="info"><div class="row"><h3>${esc(s.name)}</h3><span class="tag">${CAT_LABEL[s.category]}</span></div>
+      <p>${esc(s.description)}</p></div>
+    </button></article>`;
+}
+
+/* ===== 렌더 ===== */
+function renderChips(){ $("#chips").innerHTML=CATS.map(c=>`<button class="chip" data-cat="${c.id}" aria-pressed="${st.cat===c.id}">${c.label}</button>`).join(""); }
+function renderExplore(){
+  const q=st.q.trim().toLowerCase();
+  const l=SPECIALTIES.filter(s=>(st.cat==="all"||s.category===st.cat)&&s.name.toLowerCase().includes(q));
+  $("#exCount").textContent=`${l.length}개의 특산물`;
+  $("#grid").innerHTML=l.length?l.map(card).join(""):`<div class="empty"><p>조건에 맞는 특산물이 없습니다.</p><button class="btn btn-line" data-reset>검색 초기화</button></div>`;
+  $("#qx").hidden=!st.q;
+}
+function renderWish(){
+  const all=SPECIALTIES.filter(isSel), q=st.wq.trim().toLowerCase();
+  const l=all.filter(s=>s.name.toLowerCase().includes(q)).sort(byScore);
+  $("#wCount").textContent=`전체 ${all.length}개`+(q?` · 검색 결과 ${l.length}개`:"");
+  $("#navCount").textContent=all.length;
+  $("#wGrid").innerHTML=!all.length?`<div class="empty"><p>아직 저장한 곳이 없어요.<br>마음에 드는 특산물의 ♡를 눌러 보세요!</p><a class="btn btn-main" href="#explore">특산물 둘러보기</a></div>`
+    :!l.length?`<div class="empty"><p>검색 결과가 없어요.</p><button class="btn btn-line" data-wreset>검색 초기화</button></div>`:l.map(card).join("");
+  $("#wqx").hidden=!st.wq;
+}
+const relRests=s=>s.restaurantIds.map(id=>RESTAURANTS.find(r=>r.id===id)).filter(Boolean);
+function restCard(r,s){
+  return `<div class="rest"><h4>${esc(r.name)}</h4><p>${esc(r.description||"")}</p>
+  <p><b>대표 메뉴</b> ${esc((r.representativeMenu||[]).join(", "))}</p>
+  ${r.reason?`<p><b>${esc(s?s.name:"특산물")} 관련 이유</b> ${esc(r.reason)}</p>`:""}
+  <p><b>주소</b> ${esc(r.address)}${r.phone?` · ${esc(r.phone)}`:""}</p>
+  ${r.source||r.verifiedAt?`<p>출처: ${esc(r.source||"-")}${r.verifiedAt?` · 확인일 ${esc(r.verifiedAt)}`:""}</p>`:""}
+  <div class="maplinks"><a href="${esc(r.kakaoMapUrl||kakao(r.name+" "+r.address))}" target="_blank" rel="noopener noreferrer">지도에서 보기</a></div></div>`;
+}
+function renderRest(){
+  const links=SPECIALTIES.map(s=>`<a href="${kakao("제주 "+s.name+" 맛집")}" target="_blank" rel="noopener noreferrer">${s.emoji} ${esc(s.name)}</a>`).join("");
+  $("#restBox").innerHTML=`<div class="rest-links">${links}</div>`+(RESTAURANTS.length?RESTAURANTS.map(r=>restCard(r)).join(""):`<p class="lead" style="margin-top:18px">등록된 맛집 데이터는 아직 없어요. 위 버튼으로 카카오맵에서 바로 검색해 보세요.</p>`);
+}
+function render(pulse){
+  renderExplore(); renderWish();
+  if(openId) syncModal();
+  if(pulse) document.querySelectorAll(`[data-heart="${pulse}"]`).forEach(b=>b.classList.add("pulse"));
+}
+
+/* ===== 상세 모달 ===== */
+let openId=null,lastF=null;
+function openDetail(id){
+  const s=SPECIALTIES.find(x=>x.id===id); if(!s) return;
+  openId=id; lastF=document.activeElement;
+  const rs=relRests(s), on=isSel(s), q="제주 "+s.name+" 맛집";
+  $("#modal").innerHTML=`<button class="close" data-close aria-label="닫기">✕</button>
+  ${photo(s)}
+  <div class="body">
+    <span class="tag">${CAT_LABEL[s.category]}</span>
+    <h3 id="mTitle">${esc(s.name)}</h3><p>${esc(s.description)}</p>
+    <div class="facts">
+      <div><small>제주에서 유명한 이유</small>${esc(s.why)}</div>
+      <div><small>제철·추천 시기</small>${esc(s.season)}</div>
+      <div><small>추천 점수 (서비스 내부 기준)</small>${s.score}점 · 실제 사용자 평점이 아니에요</div>
+    </div>
+    <h4>🍽️ 관련 맛집</h4>
+    ${rs.length?rs.map(r=>restCard(r,s)).join(""):`<p class="lead">등록된 관련 맛집이 아직 없습니다.</p>`}
+    <div class="maplinks"><a href="${kakao(q)}" target="_blank" rel="noopener noreferrer">카카오맵에서 검색</a><a class="alt" href="${naver(q)}" target="_blank" rel="noopener noreferrer">네이버지도에서 검색</a></div>
+    <div class="maplinks"><button class="btn btn-line" id="mSave" data-heart="${s.id}" aria-pressed="${on}">${on?"♥ 저장됨":"♡ 가고 싶은 곳에 저장"}</button></div>
+  </div>`;
+  $("#overlay").classList.add("open"); document.body.style.overflow="hidden"; $("#modal .close").focus();
+}
+function syncModal(){ const s=SPECIALTIES.find(x=>x.id===openId),b=$("#mSave"); if(!s||!b) return; const on=isSel(s); b.textContent=on?"♥ 저장됨":"♡ 가고 싶은 곳에 저장"; b.setAttribute("aria-pressed",on); }
+function closeDetail(){ $("#overlay").classList.remove("open"); document.body.style.overflow=""; openId=null; if(lastF&&lastF.focus) lastF.focus(); }
+
+/* ===== 이벤트 ===== */
+document.addEventListener("click",e=>{
+  const t=e.target, h=t.closest("[data-heart]");
+  if(h){ e.stopPropagation(); toggle(h.dataset.heart); return; }
+  const o=t.closest("[data-open]"); if(o){ openDetail(o.dataset.open); return; }
+  const c=t.closest("[data-cat]"); if(c){ st.cat=c.dataset.cat; renderChips(); renderExplore(); return; }
+  if(t.closest("[data-reset]")){ st.q="";st.cat="all";$("#q").value="";renderChips();renderExplore();return; }
+  if(t.closest("[data-wreset]")){ st.wq="";$("#wq").value="";renderWish();return; }
+  if(t.closest("[data-close]")||t===$("#overlay")) closeDetail();
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ if(openId) closeDetail(); else setChat(false); } });
+$("#q").addEventListener("input",e=>{st.q=e.target.value;renderExplore();});
+$("#qx").addEventListener("click",()=>{st.q="";$("#q").value="";renderExplore();$("#q").focus();});
+$("#wq").addEventListener("input",e=>{st.wq=e.target.value;renderWish();});
+$("#wqx").addEventListener("click",()=>{st.wq="";$("#wq").value="";renderWish();$("#wq").focus();});
+
+/* ===== AI 챗봇 ===== */
+const KEYLS="jeju-hanip:gemini-key"; let hist=[],busy=false,last=0; const log=$("#log");
+const getKey=()=>{try{return localStorage.getItem(KEYLS)||"";}catch(e){return "";}};
+function add(text,cls){const d=document.createElement("div");d.className="msg "+cls;d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;}
+function setChat(o){ $("#chat").classList.toggle("open",o); $("#fab").setAttribute("aria-expanded",o); if(o) $("#cin").focus(); }
+$("#fab").addEventListener("click",()=>setChat(!$("#chat").classList.contains("open")));
+$("#cx").addEventListener("click",()=>setChat(false));
+$("#cfgBtn").addEventListener("click",()=>$("#cfg").classList.toggle("open"));
+$("#keySave").addEventListener("click",()=>{const v=$("#keyIn").value.trim();if(!v)return;try{localStorage.setItem(KEYLS,v);}catch(e){add("이 브라우저에서는 키를 저장할 수 없어요.","err");return;}$("#keyIn").value="";$("#cfg").classList.remove("open");toast("API 키를 저장했어요");});
+$("#keyDel").addEventListener("click",()=>{try{localStorage.removeItem(KEYLS);}catch(e){}$("#keyIn").value="";toast("API 키를 삭제했어요");});
+function sysPrompt(){
+  const d=SPECIALTIES.map(s=>`- ${s.name}(${CAT_LABEL[s.category]}): ${s.description} 제철 참고: ${s.season}`).join("\n");
+  const r=RESTAURANTS.length?RESTAURANTS.map(x=>`- ${x.name} (${x.address}): ${(x.representativeMenu||[]).join(", ")}`).join("\n"):"(등록된 맛집 없음)";
+  return `당신은 '제주 한입'의 AI 챗봇 '제주 특산물 도우미'입니다. 제주 특산물, 제철, 구매·보관, 향토음식, 여행 일정과 특산물 체험을 한국어로 친근하고 간결하게(최대 8문장) 답하세요.
+아래 사이트 데이터에 없는 식당을 확정적으로 추천하지 말고 지도 앱 검색을 안내하세요. 실시간 검색을 하지 않으므로 최신 영업시간·예약·가격은 아는 척하지 말고 직접 확인하라고 안내하세요. 확실하지 않으면 그렇게 말하세요. 제주와 무관한 요청은 정중히 제주 주제로 돌려주세요.
+[특산물]\n${d}\n[등록된 맛집]\n${r}`;
+}
+/* API 키 없이 쓰는 기본 모드: 사이트에 등록된 데이터만으로 답합니다 (생성형 AI가 아니라 키워드 규칙 기반) */
+function localAnswer(q){
+  const t=q.replace(/\s+/g,"");
+  const line=s=>`• ${s.name} — ${s.description} (제철: ${s.season})`;
+  const found=SPECIALTIES.filter(s=>t.includes(s.name.replace(/\s+/g,""))||(s.name.startsWith("제주")&&t.includes(s.name.slice(2))));
+  if(/맛집|식당|어디서|먹을곳|카페/.test(t)){
+    const s=found[0], key=(s?s.name:"특산물")+" 맛집";
+    return `등록된 맛집 데이터는 아직 없어서 특정 식당을 추천드리기 어려워요. 영업시간·예약 여부는 직접 확인이 필요해요.\n지도에서 "제주 ${key}"로 검색해 보세요:\n${kakao("제주 "+key)}`;
+  }
+  if(/저장|가고싶|내목록|찜/.test(t)){
+    const l=SPECIALTIES.filter(isSel).sort(byScore);
+    return l.length?`지금 저장한 목록(${l.length}개)이에요:\n`+l.map(s=>`• ${s.name} (추천 점수 ${s.score})`).join("\n"):"아직 저장한 곳이 없어요. 특산물 카드의 ♡를 눌러 담아 보세요!";
+  }
+  const season=/지금|요즘|이번달|오늘/.test(t)?["겨울","겨울","봄","봄","봄","여름","여름","여름","가을","가을","가을","겨울"][new Date().getMonth()]:(t.match(/봄|여름|가을|겨울/)||[])[0];
+  if(season){
+    const l=SPECIALTIES.filter(s=>s.season.includes(season));
+    if(l.length) return `${season}에 즐기기 좋은 것으로 알려진 특산물이에요 (해마다 달라질 수 있어요):\n`+l.map(line).join("\n");
+  }
+  const cat=CATS.find(c=>c.id!=="all"&&(t.includes(CAT_LABEL[c.id])||(c.id==="seafood"&&/생선|바다/.test(t))||(c.id==="fruit"&&/귤|과일/.test(t))));
+  if(cat&&!found.length) return `${CAT_LABEL[cat.id]} 특산물이에요:\n`+SPECIALTIES.filter(s=>s.category===cat.id).sort(byScore).map(line).join("\n");
+  if(found.length) return found.slice(0,3).map(s=>`${s.emoji} ${s.name}\n${s.description}\n왜 유명할까요? ${s.why}\n제철·추천 시기: ${s.season}`).join("\n\n");
+  if(/추천|뭐먹|인기|대표/.test(t)) return "추천 점수가 높은 특산물이에요 (서비스 내부 기준):\n"+[...SPECIALTIES].sort(byScore).slice(0,5).map(line).join("\n");
+  return "기본 모드라 등록된 특산물 정보만 답할 수 있어요. 이렇게 물어보세요:\n• \"감귤 알려줘\" / \"갈치는 언제가 제철이야?\"\n• \"여름 특산물\" / \"지금 뭐 먹지?\"\n• \"해산물 알려줘\" / \"흑돼지 맛집\"\n• \"내 저장 목록\"\n더 자유로운 대화는 ⚙에서 Gemini API 키를 등록하면 가능해요.";
+}
+async function ask(){
+  const m=hist.slice(-MAX_TURNS*2);
+  if(CHAT_ENDPOINT){
+    const r=await fetch(CHAT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:m})});
+    if(!r.ok) throw new Error("server:"+r.status);
+    const j=await r.json(); if(!j||typeof j.reply!=="string") throw new Error("bad"); return j.reply;
+  }
+  const key=getKey(); if(!key) return localAnswer(m[m.length-1].content);
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},
+    body:JSON.stringify({systemInstruction:{parts:[{text:sysPrompt()}]},contents:m.map(x=>({role:x.role==="user"?"user":"model",parts:[{text:x.content}]})),generationConfig:{maxOutputTokens:MAX_OUT,temperature:.6}})});
+  if(!r.ok) throw new Error("gemini:"+r.status);
+  const j=await r.json(), p=j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts;
+  const t=p?p.map(x=>x.text||"").join("").trim():""; if(!t) throw new Error("empty"); return t;
+}
+function errText(e){
+  const m=String(e.message||e);
+  if(m==="no-key") return "AI 챗봇을 쓰려면 먼저 ⚙에서 Gemini API 키를 등록해 주세요. (특산물 탐색과 저장은 키 없이도 사용할 수 있어요.)";
+  if(/^(gemini|server):(400|401|403)$/.test(m)) return "API 키가 올바르지 않거나 권한이 없어요. ⚙에서 키를 확인해 주세요.";
+  if(/:429$/.test(m)) return "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.";
+  if(m==="empty") return "답변을 만들지 못했어요. 질문을 바꿔 다시 물어봐 주세요.";
+  return "지금은 답변을 가져오지 못했어요. 네트워크를 확인하고 잠시 후 다시 시도해 주세요.";
+}
+async function sendChat(){
+  const inp=$("#cin"),text=inp.value.trim(); if(!text||busy) return;
+  if(text.length>MAX_INPUT){add(`질문은 ${MAX_INPUT}자 이내로 입력해 주세요.`,"err");return;}
+  const w=COOLDOWN-(Date.now()-last); if(w>0){toast(`${Math.ceil(w/1000)}초 뒤에 다시 보내 주세요`);return;}
+  last=Date.now(); busy=true; $("#send").disabled=true; inp.value=""; add(text,"me"); hist.push({role:"user",content:text});
+  const ld=document.createElement("div"); ld.className="msg bot dots"; ld.setAttribute("aria-label","답변 생성 중"); ld.innerHTML="<span></span><span></span><span></span>"; log.appendChild(ld); log.scrollTop=log.scrollHeight;
+  try{ const r=await ask(); ld.remove(); add(r,"bot"); hist.push({role:"model",content:r}); }
+  catch(e){ ld.remove(); hist.pop(); add(errText(e),"err"); }
+  finally{ busy=false; $("#send").disabled=false; inp.focus(); }
+}
+$("#cform").addEventListener("submit",e=>{e.preventDefault();sendChat();});
+$("#cin").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();sendChat();} });
+add("안녕하세요, AI 챗봇이에요! 제주 특산물에 대해 물어보세요 🍊\n예: \"감귤 알려줘\", \"여름 특산물\", \"지금 뭐 먹지?\"\n(API 키 없이는 기본 모드로 등록된 정보만 답해요)","bot");
+
+/* ===== 시작 ===== */
+$("#heroBg").style.backgroundImage=`url("${HERO_IMG}")`;
+renderChips(); renderExplore(); renderWish(); renderRest();
+</script>
+</body>
+</html>
